@@ -94,7 +94,7 @@ class ChatViewController: UIViewController {
         ChatRoom.getAllMessages(forUserID: gChatUserId) {[weak weakSelf = self] (chatRoom) in
             
             weakSelf?.myChatArray.append(chatRoom)
-            weakSelf?.myChatArray.sort{ $0.ChatRoomTimeStamp > $1.ChatRoomTimeStamp }
+            weakSelf?.myChatArray.sort{ $0.ChatRoomTimeStamp < $1.ChatRoomTimeStamp }
             
             DispatchQueue.main.async {
                 
@@ -156,7 +156,12 @@ extension ChatViewController: UITextViewDelegate {
     
         UIView.animate(withDuration: 0.2) {
             
-            self.myTextViewBottomConstraints.constant = 250
+            if UIScreen.main.nativeBounds.height > 2400 {
+                self.myTextViewBottomConstraints.constant = 300
+            }
+            else {
+                self.myTextViewBottomConstraints.constant = 250
+            }
         }
     }
 }
@@ -192,12 +197,14 @@ extension ChatViewController: UITableViewDelegate, UITableViewDataSource {
         HELPER.roundCorner(for: (aCell?.gRightView)!, radius: 8, borderColor: UIColor.clear)
         HELPER.roundCorner(for: (aCell?.gLeftView)!, radius: 8, borderColor: UIColor.clear)
         
-        if aChatUserModel.ChatRoomOwner == .receiver {
+        if aChatUserModel.ChatRoomOwner == .sender {
             
             aCell?.gRightView.isHidden = true
             aCell?.gLeftView.isHidden = false
             
             aCell?.gLeftLabel.text = aChatUserModel.ChatRoomMessage
+            
+            //Convert TimeInterval into date
             let messageDate = Date.init(timeIntervalSince1970: TimeInterval(aChatUserModel.ChatRoomTimeStamp))
             let dataformatter = DateFormatter.init()
             dataformatter.timeStyle = .short
@@ -211,8 +218,13 @@ extension ChatViewController: UITableViewDelegate, UITableViewDataSource {
             aCell?.gLeftView.isHidden = true
             
             aCell?.gRightLabel.text = aChatUserModel.ChatRoomMessage
-            let aTimeString = HELPER.timeIntervalToStringWithInterval(interval: TimeInterval(aChatUserModel.ChatRoomTimeStamp))
-            aCell?.gRightTimeLabel.text = aTimeString
+            
+            //Convert TimeInterval into date
+            let messageDate = Date.init(timeIntervalSince1970: TimeInterval(aChatUserModel.ChatRoomTimeStamp))
+            let dataformatter = DateFormatter.init()
+            dataformatter.timeStyle = .short
+            let date = dataformatter.string(from: messageDate)
+            aCell?.gRightTimeLabel.text = date
         }
         
         return aCell!
