@@ -7,15 +7,22 @@
 //
 
 import UIKit
+import Firebase
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    let myStoryboard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        FirebaseApp.configure()
+        
+        UIBarButtonItem.appearance().setBackButtonTitlePositionAdjustment(UIOffsetMake(0, -1200), for: .default)
+        moveToScreenBasedOnLoginStatus()
+        
         return true
     }
 
@@ -42,5 +49,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
 
+    //MARK: Helper
+    
+    func moveToScreenBasedOnLoginStatus() {
+
+        if UserDefaults().isLoggedIn() == true {
+            moveToListScreen() }
+        else {
+            moveToLoginScreen() }
+    }
+    
+    func moveToLoginScreen() {
+        
+        UserDefaults().removeAllData()
+        let aViewController = myStoryboard.instantiateViewController(withIdentifier: "StartUpViewController") as? StartUpViewController
+        setRootViewController(title: SCREEN_TITLE_LOGIN ,aViewController: aViewController!)
+    }
+    
+    func moveToListScreen() {
+        
+        let aViewController = myStoryboard.instantiateViewController(withIdentifier: "AddUserViewController") as? AddUserViewController
+        setRootViewController(title: SCREEN_TITLE_CHAT, aViewController: aViewController!)
+    }
+    
+    func setRootViewController(title: String, aViewController: UIViewController) {
+        
+        let aNavigationController = UINavigationController(rootViewController: aViewController)
+        aNavigationController.setNavigationBarTitle(title: title, viewController: aViewController)
+        self.window?.rootViewController = aNavigationController
+        self.window?.makeKeyAndVisible()
+    }
 }
 
